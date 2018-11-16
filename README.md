@@ -1,5 +1,8 @@
 # bledger
 
+[![Build Status][circleci-status-img]][circleci-status-url]
+[![Coverage Status][coverage-status-img]][coverage-status-url]
+
 Ledger hardware wallet api for Bcoin.
 
 ## Usage
@@ -19,3 +22,8 @@ all code is your original work. `</legalese>`
 - Copyright (c) 2018, The Bcoin Developers (MIT License).
 
 See LICENSE for more info.
+
+[coverage-status-img]: https://codecov.io/gh/bcoin-org/bledger/badge.svg?branch=master
+[coverage-status-url]: https://codecov.io/gh/bcoin-org/bledger?branch=master
+[circleci-status-img]: https://circleci.com/gh/bcoin-org/bledger/tree/master.svg?style=shield
+[circleci-status-url]: https://circleci.com/gh/bcoin-org/bledger/tree/master
