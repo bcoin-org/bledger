@@ -26,9 +26,9 @@
     "clean": "rm -rf bledger.js build/vendor* .config/certs/* ./docs ./coverage",
     "lint": "eslint lib/ test/ || exit 0",
     "lint-ci": "eslint lib/ test/",
-    "test": "mocha --reporter spec test/*-test.js",
-    "test-ci": "istanbul cover node_modules/.bin/_mocha --report lcovonly -- --reporter spec test/*.js",
-    "test-hid": "mocha --reporter spec test/device/hid-test.js",
+    "test": "bmocha --reporter spec test/*-test.js",
+    "test-ci": "istanbul cover node_modules/.bin/bmocha --report lcovonly -- --reporter spec test/*.js",
+    "test-hid": "bmocha --reporter spec test/device/hid-test.js",
     "test-u2f": "karma start .config/karma.conf.js",
     "webpack": "webpack --config .config/webpack.js",
     "webpack-dev": "webpack --config .config/webpack.dev.js",
@@ -41,6 +41,7 @@
     "blgr": "~0.1.2",
     "bmutex": "~0.1.3",
     "bsert": "~0.0.4",
+    "buffer-map": "0.0.4",
     "bufio": "~1.0.2"
   },
   "optionalDependencies": {
@@ -52,24 +53,7 @@
   },
   "devDependencies": {
     "bcoin": "^1.0.2",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^8.0.4",
-    "babel-preset-env": "^1.7.0",
-    "babelify": "^8.0.0",
-    "browserify": "^16.2.2",
-    "eslint": "^5.9.0",
-    "istanbul": "^1.1.0-alpha.1",
-    "jsdoc": "^3.5.5",
-    "karma": "^3.1.1",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-mocha": "^1.3.0",
-    "karma-mocha-reporter": "^2.2.5",
-    "karma-webpack": "^3.0.5",
-    "mocha": "^5.2.0",
-    "uglify-es": "^3.1.3",
-    "uglifyjs-webpack-plugin": "^1.3.0",
-    "webpack": "^4.25.1",
-    "webpack-cli": "^3.1.2"
+    "bmocha": "^0.1.5"
   },
   "engines": {
     "node": ">=8.0.0"
