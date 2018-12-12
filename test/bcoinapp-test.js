@@ -19,6 +19,8 @@ const KeyRing = require('bcoin/lib/primitives/keyring');
 const {Script} = require('bcoin/lib/script');
 const hashType = Script.hashType;
 
+const {BufferMap} = require('buffer-map');
+
 const getRing = utils.getCommands('data/getRing.json');
 const getTrustedInput = utils.getCommands('data/getTrustedInput.json');
 const hashTxStart = utils.getCommands('data/hashTransactionStart.json');
@@ -95,14 +97,15 @@ describe('Bitcoin App', function () {
 
     device.set({ responses });
 
-    const tis = new Map();
+    const tis = new BufferMap();
 
     for (const tik of Object.keys(data.trusted)) {
-      tis.set(tik, Buffer.from(data.trusted[tik], 'hex'));
+      const key = Buffer.from(tik, 'hex');
+      tis.set(key, Buffer.from(data.trusted[tik], 'hex'));
     }
 
     const mtx = MTX.fromRaw(tx);
-    const pokey = data.prevoutKey;
+    const pokey = Buffer.from(data.prevoutKey, 'hex');
     const prev = Script.fromRaw(data.prev, 'hex');
 
     await btcApp.hashTransactionStartNullify(mtx, pokey, prev, tis, true);
