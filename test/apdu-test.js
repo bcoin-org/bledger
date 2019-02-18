@@ -11,9 +11,21 @@ const {APDUResponse} = LedgerProtocol;
 const {APDUError} = LedgerProtocol;
 const {addressFlags} = APDU;
 
+// classes
+const { CLA_GENERAL } = APDU.CLA;
+
+// instructions
+const {
+  INS_GET_WALLET_PUBLIC_KEY,
+  INS_GET_TRUSTED_INPUT
+} = APDU.INS;
+
+// status words
+const { SW_OK } = APDU.STATUS_WORDS;
+
 const methodByINS = {
-  PUBLIC_KEY: 'getPublicKey',
-  GET_TRUSTED_INPUT: 'getTrustedInput'
+  INS_GET_WALLET_PUBLIC_KEY: 'getWalletPublicKey',
+  INS_GET_TRUSTED_INPUT: 'getTrustedInput'
 };
 
 const INSNames = Object.keys(methodByINS);
@@ -29,10 +41,10 @@ describe('APDU', function () {
       + '76b6ab28942fd09759fe7270ac84d5d8747c5020'
       + '66254596e69deaec01b2662bea9000', 'hex');
 
-    const response = APDUResponse.getPublicKey(pubkeyResponse);
+    const response = APDUResponse.getWalletPublicKey(pubkeyResponse);
 
-    assert.strictEqual(response.status, APDU.STATUS_WORDS.SUCCESS);
-    assert.strictEqual(response.type, APDU.INS.PUBLIC_KEY);
+    assert.strictEqual(response.status, SW_OK);
+    assert.strictEqual(response.type, INS_GET_WALLET_PUBLIC_KEY);
   });
 
   it('should encode PUBLIC_KEY addressFlags', () => {
@@ -68,7 +80,10 @@ describe('APDU', function () {
     }];
 
     for (const flagTest of flagTests) {
-      const command = APDUCommand.getPublicKey(path, flagTest.addressFlags);
+      const command = APDUCommand.getWalletPublicKey(
+        path,
+        flagTest.addressFlags
+      );
 
       assert.strictEqual(command.p1, flagTest.p1,
         `P1 for ${flagTest.name} is not correct`
@@ -85,8 +100,8 @@ describe('APDU', function () {
 
     assert.instanceOf(command, APDUCommand);
     assert.strictEqual(command.p1, 0x00);
-    assert.strictEqual(command.cla, APDU.CLA.GENERAL);
-    assert.strictEqual(command.ins, APDU.INS.GET_TRUSTED_INPUT);
+    assert.strictEqual(command.cla, CLA_GENERAL);
+    assert.strictEqual(command.ins, INS_GET_TRUSTED_INPUT);
     assert.strictEqual(command.data, data);
   });
 
@@ -96,8 +111,8 @@ describe('APDU', function () {
 
     assert.instanceOf(command, APDUCommand);
     assert.strictEqual(command.p1, 0x80);
-    assert.strictEqual(command.cla, APDU.CLA.GENERAL);
-    assert.strictEqual(command.ins, APDU.INS.GET_TRUSTED_INPUT);
+    assert.strictEqual(command.cla, CLA_GENERAL);
+    assert.strictEqual(command.ins, INS_GET_TRUSTED_INPUT);
     assert.strictEqual(command.data, data);
   });
 
@@ -107,8 +122,8 @@ describe('APDU', function () {
     const response = APDUResponse.getTrustedInput(continueResponse);
 
     assert.instanceOf(response, APDUResponse);
-    assert.strictEqual(response.status, APDU.STATUS_WORDS.SUCCESS);
-    assert.strictEqual(response.type, APDU.INS.GET_TRUSTED_INPUT);
+    assert.strictEqual(response.status, SW_OK);
+    assert.strictEqual(response.type, INS_GET_TRUSTED_INPUT);
     assert.strictEqual(response.data.length, 0);
   });
 
@@ -120,8 +135,8 @@ describe('APDU', function () {
 
     const response = APDUResponse.getTrustedInput(finalResponse);
 
-    assert.strictEqual(response.status, APDU.STATUS_WORDS.SUCCESS);
-    assert.strictEqual(response.type, APDU.INS.GET_TRUSTED_INPUT);
+    assert.strictEqual(response.status, SW_OK);
+    assert.strictEqual(response.type, INS_GET_TRUSTED_INPUT);
     assert.strictEqual(response.data.length, 56);
     assert.bufferEqual(response.data, finalResponse.slice(0, -2));
   });
