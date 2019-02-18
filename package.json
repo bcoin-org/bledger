@@ -36,6 +36,9 @@
     "docs": "jsdoc -c jsdoc.json",
     "cover": "istanbul cover -x '**/lib/devices/**' node_modules/.bin/_mocha  -- --reporter spec test/*-test.js"
   },
+  "browser": {
+    "./lib/bledger": "./lib/bledger-browser.js"
+  },
   "dependencies": {
     "bcrypto": "~3.0.1",
     "blgr": "~0.1.2",
