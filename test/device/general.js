@@ -45,6 +45,31 @@ module.exports = function (Device, DeviceInfo) {
       bcoinApp = new LedgerBcoin({ device });
     });
 
+    it('should get firmware version', async () => {
+      const info = await bcoinApp.getFirmwareVersion();
+
+      assert.ok(/^\w+\.\w+\.\w+$/.test(info.version));
+      assert.strictEqual(typeof info.archID, 'number');
+      assert.strictEqual(typeof info.tcsLoaderPatchVersion, 'number');
+      assert.strictEqual(typeof info.features, 'object');
+      assert.strictEqual(typeof info.mode, 'object');
+
+      const features = [
+        'compressedPubkey',
+        'selfScreenButtons',
+        'externalScreenButtons',
+        'nfc',
+        'ble',
+        'tee'
+      ];
+
+      for (const feature of features)
+        assert.strictEqual(typeof info.features[feature], 'boolean');
+
+      assert.strictEqual(typeof info.mode.setup, 'boolean');
+      assert.strictEqual(typeof info.mode.operation, 'boolean');
+    });
+
     it('should get public key and correctly derive', async () => {
       const path = ACCOUNT;
       const xpubHD = await bcoinApp.getPublicKey(path);

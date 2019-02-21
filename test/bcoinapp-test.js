@@ -33,6 +33,8 @@ const multisigTX1 = utils.getCommands('data/tx-p2sh-mulsig.json');
 const wtx1 = utils.getCommands('data/wtx1.json');
 const multisigWTX1 = utils.getCommands('data/tx-p2wsh-mulsig.json');
 
+const firmwareInformation = utils.getCommands('data/firmwareVersion.json');
+
 describe('Bitcoin App', function () {
   let device, bcoinApp, btcApp;
 
@@ -40,6 +42,20 @@ describe('Bitcoin App', function () {
     device = new Device();
     bcoinApp = new LedgerBcoin({ device });
     btcApp = new LedgerBTC(device);
+  });
+
+  it('should get firmware version', async () => {
+    const {data, responses, commands} = firmwareInformation;
+
+    device.set({ responses });
+
+    const info = await bcoinApp.getFirmwareVersion();
+    const deviceCommands = device.getCommands();
+
+    assert.strictEqual(deviceCommands.length, 1);
+    assert.bufferEqual(deviceCommands[0], commands[0]);
+
+    assert.deepStrictEqual(info, data.info);
   });
 
   it('should get ring from pubkey', async () => {

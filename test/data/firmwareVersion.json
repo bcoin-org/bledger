@@ -1,0 +1,25 @@
+{
+  "info": {
+    "version": "1.2.8",
+    "archID": 48,
+    "tcsLoaderPatchVersion": 0,
+    "features": {
+      "compressedPubkey": true,
+      "selfScreenButtons": true,
+      "externalScreenButtons": false,
+      "nfc": true,
+      "ble": true,
+      "tee": false
+    },
+    "mode": {
+      "setup": true,
+      "operation": true
+    }
+  },
+  "commands": [
+    "e0c4000000"
+  ],
+  "responses": [
+    "1b300102080100039000"
+  ]
+}
