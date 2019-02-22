@@ -87,17 +87,25 @@ module.exports = function (Device, DeviceInfo) {
 
       for (const path of Object.keys(paths)) {
         const derivedHD = paths[path];
-        const pubHD = await bcoinApp.getPublicKey(path);
+        // NOTE: This will be relatively slow, because
+        // we are requesting two pubkeys instead of one.
+        const pubHD = await bcoinApp.getPublicKey(path, true);
 
         assert.strictEqual(pubHD.depth, derivedHD.depth, 'depth did not match');
         assert.strictEqual(pubHD.childIndex, derivedHD.childIndex,
-          'childIndex did not match'
+          'childIndex did not match.'
         );
         assert.bufferEqual(pubHD.chainCode, derivedHD.chainCode,
-          'chainCode did not match'
+          'chainCode did not match.'
         );
         assert.bufferEqual(pubHD.publicKey, derivedHD.publicKey,
-          'publicKey did not match'
+          'publicKey did not match.'
+        );
+
+        assert.strictEqual(
+          pubHD.parentFingerPrint,
+          derivedHD.parentFingerPrint,
+          'parentFingerPrint did not match.'
         );
       }
     });

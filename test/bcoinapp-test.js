@@ -22,6 +22,7 @@ const hashType = Script.hashType;
 const {BufferMap} = require('buffer-map');
 
 const getRing = utils.getCommands('data/getRing.json');
+const getParentFingerprint = utils.getCommands('data/getParentFP.json');
 const getTrustedInput = utils.getCommands('data/getTrustedInput.json');
 const hashTxStart = utils.getCommands('data/hashTransactionStart.json');
 const hashOutputFinalize = utils.getCommands('data/hashOutputFinalize.json');
@@ -85,6 +86,30 @@ describe('Bitcoin App', function () {
 
     // ring checks
     assert.strictEqual(ring.getPublicKey('hex'), data.pubkey);
+  });
+
+  it('should get parent fingerprint', async () => {
+    const {data, responses, commands} = getParentFingerprint;
+
+    device.set({ responses });
+
+    bcoinApp.set({
+      network: 'main'
+    });
+
+    const path = data.path;
+    const hd = await bcoinApp.getPublicKey(path, true);
+
+    assert.strictEqual(hd.parentFingerPrint, data.parentFingerPrint);
+    assert.strictEqual(hd.publicKey.toString('hex'), data.publicKey);
+
+    const deviceCommands = device.getCommands();
+
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.bufferEqual(deviceCommand, commands[i],
+        `Message ${i} wasn't correct`
+      );
+    }
   });
 
   it('should handle getTrustedInput commands', async () => {
