@@ -77,6 +77,15 @@ module.exports = function (Device, DeviceInfo) {
       }
     });
 
+    it('should get public key at depth 0', async () => {
+      const hd = await bcoinApp.getPublicKey(m);
+
+      assert.ok(hd);
+      assert.equal(hd.depth, 0);
+      assert.equal(hd.childIndex, 0);
+      assert.equal(hd.parentFingerPrint, 0);
+    });
+
     it('should sign simple p2pkh transaction', async () => {
       const path = PATH1;
       const pubHD = await bcoinApp.getPublicKey(path);
