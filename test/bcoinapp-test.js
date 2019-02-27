@@ -35,6 +35,7 @@ const wtx1 = utils.getCommands('data/wtx1.json');
 const multisigWTX1 = utils.getCommands('data/tx-p2wsh-mulsig.json');
 
 const firmwareInformation = utils.getCommands('data/firmwareVersion.json');
+const operationMode = utils.getCommands('data/operationMode.json');
 
 describe('Bitcoin App', function () {
   let device, bcoinApp, btcApp;
@@ -57,6 +58,24 @@ describe('Bitcoin App', function () {
     assert.bufferEqual(deviceCommands[0], commands[0]);
 
     assert.deepStrictEqual(info, data.info);
+  });
+
+  it('should get and set operation mode', async () => {
+    const {data, responses, commands} = operationMode;
+
+    device.set({ responses });
+
+    const mode = await bcoinApp.getOperationMode();
+
+    assert.deepStrictEqual(mode, data.operationMode);
+
+    await bcoinApp.setOperationMode(mode.mode);
+
+    const deviceCommands = device.getCommands();
+
+    assert.strictEqual(deviceCommands.length, 2);
+    assert.bufferEqual(deviceCommands[0], commands[0]);
+    assert.bufferEqual(deviceCommands[1], commands[1]);
   });
 
   it('should get ring from pubkey', async () => {
@@ -313,7 +332,7 @@ describe('Bitcoin App', function () {
   });
 
   it('should sign P2WSH transaction', async () => {
-    const {data, tx, commands, responses } = multisigWTX1;
+    const {data, tx, commands, responses} = multisigWTX1;
 
     device.set({ responses });
 
