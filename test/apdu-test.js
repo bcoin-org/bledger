@@ -5,23 +5,25 @@
 
 const assert = require('./util/assert');
 const LedgerProtocol = require('../lib/protocol');
-const {APDU, LedgerError} = LedgerProtocol;
+const {LedgerError} = LedgerProtocol;
 const {APDUCommand} = LedgerProtocol;
 const {APDUResponse} = LedgerProtocol;
 const {APDUError} = LedgerProtocol;
-const {addressFlags} = APDU;
+const {common} = LedgerProtocol;
+
+const {addressFlags} = common;
 
 // classes
-const { CLA_GENERAL } = APDU.CLA;
+const { CLA_GENERAL } = common.CLA;
 
 // instructions
 const {
   INS_GET_WALLET_PUBLIC_KEY,
   INS_GET_TRUSTED_INPUT
-} = APDU.INS;
+} = common.INS;
 
 // status words
-const { SW_OK } = APDU.STATUS_WORDS;
+const { SW_OK } = common.STATUS_WORDS;
 
 const methodByINS = {
   INS_GET_WALLET_PUBLIC_KEY: 'getWalletPublicKey',
