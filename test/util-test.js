@@ -69,6 +69,9 @@ describe('utils', function () {
 });
 
 function checkSignature(vector, lsig) {
+  const msgbuf = vector.originalMessage;
+  const hash = vector.messageHash;
+
   assert.bufferEqual(lsig.r, vector.r, 'R is not correct.');
   assert.bufferEqual(lsig.s, vector.s, 'S is not correct.');
   assert.strictEqual(lsig.recid, vector.param, 'RecId is not correct.');
@@ -79,19 +82,57 @@ function checkSignature(vector, lsig) {
   assert.bufferEqual(lsig.toCoreSignature(), vector.core,
     'Bitcoin Core signature encoding error.');
 
-  const compressedPublicKey = lsig.recover(vector.encodedMessage, true);
-  const uncompressedPublicKey = lsig.recover(vector.encodedMessage, false);
+  {
+    const compressedPublicKey = lsig.recover(hash, true);
+    const uncompressedPublicKey = lsig.recover(hash, false);
 
-  assert.bufferEqual(compressedPublicKey, vector.compressedPublicKey,
-    'Recovered compressed public key does not match.');
-  assert.bufferEqual(uncompressedPublicKey, vector.uncompressedPublicKey,
-    'Recovered uncompressed public key does not match.');
+    assert.bufferEqual(compressedPublicKey, vector.compressedPublicKey,
+      'Recovered compressed public key does not match.');
+    assert.bufferEqual(uncompressedPublicKey, vector.uncompressedPublicKey,
+      'Recovered uncompressed public key does not match.');
+  }
 
-  assert.ok(lsig.verify(vector.encodedMessage, vector.compressedPublicKey),
+  {
+    const compressedPublicKey = lsig.recoverMessage(msgbuf, true);
+    const uncompressedPublicKey = lsig.recoverMessage(msgbuf, false);
+
+    assert.bufferEqual(compressedPublicKey, vector.compressedPublicKey,
+      'Recovered compressed public key does not match.');
+    assert.bufferEqual(uncompressedPublicKey, vector.uncompressedPublicKey,
+      'Recovered uncompressed public key does not match.');
+  }
+
+  {
+    const compressedPublicKey = lsig.recoverMessage(msgbuf.toString(), true);
+    const uncompressedPublicKey = lsig.recoverMessage(msgbuf.toString(), false);
+
+    assert.bufferEqual(compressedPublicKey, vector.compressedPublicKey,
+      'Recovered compressed public key does not match.');
+    assert.bufferEqual(uncompressedPublicKey, vector.uncompressedPublicKey,
+      'Recovered uncompressed public key does not match.');
+  }
+
+  assert.ok(lsig.verify(hash, vector.compressedPublicKey),
     'Verification failed for compressed public key.'
   );
 
-  assert.ok(lsig.verify(vector.encodedMessage, vector.uncompressedPublicKey),
+  assert.ok(lsig.verify(hash, vector.uncompressedPublicKey),
+    'Verification failed for uncompressed public key.'
+  );
+
+  assert.ok(lsig.verifyMessage(msgbuf, vector.compressedPublicKey),
+    'Verification failed for compressed public key.'
+  );
+
+  assert.ok(lsig.verifyMessage(msgbuf, vector.uncompressedPublicKey),
+    'Verification failed for uncompressed public key.'
+  );
+
+  assert.ok(lsig.verifyMessage(msgbuf.toString(), vector.compressedPublicKey),
+    'Verification failed for compressed public key.'
+  );
+
+  assert.ok(lsig.verifyMessage(msgbuf.toString(), vector.uncompressedPublicKey),
     'Verification failed for uncompressed public key.'
   );
 }
@@ -101,8 +142,13 @@ describe('Signature', function () {
 
   before(() => {
     for (const [k, v] of Object.entries(sigVector)) {
-      if (k === 'param' || k === 'originalMessage') {
+      if (k === 'param') {
         vector[k] = v;
+        continue;
+      }
+
+      if (k === 'originalMessage') {
+        vector[k] = Buffer.from(v, 'binary');
         continue;
       }
 
@@ -111,9 +157,10 @@ describe('Signature', function () {
   });
 
   it('should encode message', () => {
-    const encoded = common.encodeMessage(vector.originalMessage);
+    const msgbuf = Buffer.from(vector.originalMessage);
+    const hash = common.encodeMessage(msgbuf);
 
-    assert.bufferEqual(encoded, vector.encodedMessage);
+    assert.bufferEqual(hash, vector.messageHash);
   });
 
   it('should create sig from Options', () => {
