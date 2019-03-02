@@ -6,6 +6,7 @@
 const assert = require('../util/assert');
 const bledger = require('../../lib/bledger');
 const fundUtil = require('../util/fund');
+const {encodeMessage} = require('../../lib/protocol/common');
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const MTX = require('bcoin/lib/primitives/mtx');
@@ -491,6 +492,31 @@ module.exports = function (Device, DeviceInfo) {
 
       assert.ok(tx.verify(), 'Transaction was not signed');
     });
+
+    for (const legacy of [false, true]) {
+      const suffix = legacy ? ' (legacy)' : '';
+
+      it(`should sign arbitrary message ${suffix}`, async () => {
+        const path = PATH1;
+        const pubHD = await bcoinApp.getPublicKey(path);
+        const pubkey = pubHD.publicKey;
+        const message = 'Hello bledger!';
+        const hash = encodeMessage(Buffer.from(message, 'binary'));
+
+        let lsig;
+        if (legacy)
+          lsig = await bcoinApp.signMessageLegacy(path, message);
+        else
+          lsig = await bcoinApp.signMessage(path, message);
+
+        const recoveredPublicKey = lsig.recoverMessage(message, true);
+
+        assert.bufferEqual(pubkey, recoveredPublicKey,
+          'Could not recover public key.');
+        assert.ok(lsig.verifyMessage(message, pubkey));
+        assert.ok(lsig.verify(hash, pubkey));
+      });
+    }
   });
 };
 

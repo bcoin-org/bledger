@@ -11,6 +11,7 @@ const {Device} = require('./util/device');
 const LedgerBTC = require('../lib/ledger');
 const LedgerBcoin = require('../lib/bcoin');
 const LedgerTXInput = require('../lib/txinput');
+const LedgerSignature = require('../lib/utils/signature');
 
 const TX = require('bcoin/lib/primitives/tx');
 const MTX = require('bcoin/lib/primitives/mtx');
@@ -36,6 +37,7 @@ const multisigWTX1 = utils.getCommands('data/tx-p2wsh-mulsig.json');
 
 const firmwareInformation = utils.getCommands('data/firmwareVersion.json');
 const operationMode = utils.getCommands('data/operationMode.json');
+const signMessages = utils.getCommands('data/signMessages.json');
 
 describe('Bitcoin App', function () {
   let device, bcoinApp, btcApp;
@@ -358,6 +360,123 @@ describe('Bitcoin App', function () {
     assert.bufferEqual(mtx.toRaw(), Buffer.from(data.signedTX, 'hex'),
       'Transaction was not signed properly'
     );
+  });
+
+  it('should sign abritrary messages', async () => {
+    const {
+      path,
+      publicKey,
+      messagesToSign,
+      signatures,
+      commands,
+      responses
+    } = signMessages.data;
+
+    device.set({
+      responses: responses.map(r => Buffer.from(r, 'hex'))
+    });
+
+    for (const [i, message] of messagesToSign.entries()) {
+      const msgbuf = Buffer.from(message, 'hex');
+      const signature = await bcoinApp.signMessage(path, msgbuf);
+
+      assert.strictEqual(
+        signature.toString('hex'),
+        signatures[i],
+        ''
+      );
+
+      const recPubKey = signature.recoverMessage(msgbuf);
+      assert.strictEqual(recPubKey.toString('hex'), publicKey);
+      assert.ok(signature.verifyMessage(msgbuf, recPubKey));
+    }
+
+    const deviceCommands = device.getCommands();
+    assert.strictEqual(deviceCommands.length, commands.length);
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.strictEqual(deviceCommand.toString('hex'), commands[i],
+        `Message ${i} was not correct.`
+      );
+    }
+  });
+
+  it('should sign abritrary messages(legacy)', async () => {
+    const {
+      path,
+      publicKey,
+      messagesToSign,
+      signaturesLegacy,
+      commandsLegacy,
+      responsesLegacy
+    } = signMessages.data;
+
+    device.set({
+      responses: responsesLegacy.map(r => Buffer.from(r, 'hex'))
+    });
+
+    for (const [i, message] of messagesToSign.entries()) {
+      const msgbuf = Buffer.from(message, 'hex');
+
+      if (signaturesLegacy[i] == null) {
+        let err;
+
+        try {
+          await bcoinApp.signMessageLegacy(path, msgbuf);
+        } catch (e) {
+          err = e;
+        }
+
+        assert(err);
+        assert.strictEqual(err.message, 'Message + path is too big.');
+        continue;
+      }
+
+      const signature = await bcoinApp.signMessageLegacy(path, msgbuf);
+      assert.equal(signature.toString('hex'), signaturesLegacy[i]);
+
+      assert.ok(signature.verifyMessage(msgbuf, Buffer.from(publicKey, 'hex')));
+    }
+
+    const deviceCommands = device.getCommands();
+
+    assert.strictEqual(deviceCommands.length, commandsLegacy.length);
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.strictEqual(deviceCommand.toString('hex'), commandsLegacy[i],
+        `Message ${i} was not correct.`
+      );
+    }
+  });
+
+  it('should verify signed messages from ledger', async () => {
+    const {
+      path,
+      messagesToSign,
+      signatures,
+      commandsVerify,
+      responsesVerify
+    } = signMessages.data;
+
+    device.set({
+      responses: responsesVerify.map(r => Buffer.from(r, 'hex'))
+    });
+
+    for (const [i, message] of messagesToSign.entries()) {
+      const msgbuf = Buffer.from(message, 'hex');
+      const sig = LedgerSignature.fromLedgerSignature(
+        Buffer.from(signatures[i], 'hex')
+      );
+
+      const verify = await bcoinApp.verifyMessage(path, msgbuf, sig);
+      assert.strictEqual(verify, true, `Verification failed for message #${i}`);
+    }
+
+    const deviceCommands = device.getCommands();
+    assert.strictEqual(deviceCommands.length, responsesVerify.length);
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.strictEqual(deviceCommand.toString('hex'), commandsVerify[i],
+        `Message ${i} was not correct.`
+      );
+    }
   });
 });
 
