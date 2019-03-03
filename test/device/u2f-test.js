@@ -9,7 +9,7 @@ const bledger = require('../../lib/bledger');
 const {Device, DeviceInfo} = bledger.U2F;
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
 
-describe('HID Device', function () {
+describe('U2F Device', function () {
   this.timeout(DEVICE_TIMEOUT);
 
   it('should list devices', async () => {
