@@ -80,6 +80,34 @@ describe('Bitcoin App', function () {
     assert.bufferEqual(deviceCommands[1], commands[1]);
   });
 
+  it('should get random bytes', async () => {
+    const responses = [
+      Buffer.from('1d6bd12e842c2ee601f41c496054cc2b470280599000', 'hex')
+    ];
+
+    const expected = Buffer.from(
+      '1d6bd12e842c2ee601f41c496054cc2b47028059',
+      'hex'
+    );
+
+    const expectedCommand = Buffer.from('e0c0000014', 'hex');
+
+    device.set({ responses });
+
+    const randomBytes = await bcoinApp.randomBytes(20);
+
+    assert.bufferEqual(randomBytes, expected,
+      'Could not get random bytes correctly.');
+
+    const deviceCommands = device.getCommands();
+
+    assert.strictEqual(deviceCommands.length, 1,
+      'Incorrect number of commands.');
+
+    assert.bufferEqual(deviceCommands[0], expectedCommand,
+      'Incorrect first message.');
+  });
+
   it('should get ring from pubkey', async () => {
     const {data, responses, commands} = getRing;
 
