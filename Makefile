@@ -16,13 +16,13 @@ webpack-dev: ./build/vendor.js
 webpack-devdeps:
 	@npm run webpack-devdeps
 
-cert: .config/certs/cert.pem
+.certs:
+	mkdir .certs
 
-
-.config/certs/cert.pem:
+.certs/cert.pem: .certs
 	@openssl req -x509 -newkey rsa:2048 \
-		-keyout .config/certs/key.pem \
-		-out .config/certs/cert.pem \
+		-keyout .certs/key.pem \
+		-out .certs/cert.pem \
 		-days 365 -batch -nodes
 
 clean:
@@ -37,7 +37,7 @@ test:
 test-hid:
 	@npm run test-hid
 
-test-u2f: .config/certs/cert.pem
+test-u2f: .certs/cert.pem
 	@npm run test-u2f
 
 docs:

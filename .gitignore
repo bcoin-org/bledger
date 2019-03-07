@@ -5,5 +5,5 @@ npm-debug.log
 app.js
 coverage/
 
-.config/certs/*
-!.config/certs/.keep
+.certs/*
+!.certs/.keep
