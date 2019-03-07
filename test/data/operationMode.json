@@ -1,0 +1,15 @@
+{
+  "description": "First get and then set operation mode.",
+  "operationMode": {
+    "mode": 1,
+    "modeName": "OPERATION_MODE_WALLET"
+  },
+  "commands": [
+    "e024000000",
+    "e02600000101"
+  ],
+  "responses": [
+    "019000",
+    "9000"
+  ]
+}

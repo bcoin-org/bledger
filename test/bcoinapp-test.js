@@ -11,6 +11,7 @@ const {Device} = require('./util/device');
 const LedgerBTC = require('../lib/ledger');
 const LedgerBcoin = require('../lib/bcoin');
 const LedgerTXInput = require('../lib/txinput');
+const LedgerSignature = require('../lib/utils/signature');
 
 const TX = require('bcoin/lib/primitives/tx');
 const MTX = require('bcoin/lib/primitives/mtx');
@@ -22,6 +23,7 @@ const hashType = Script.hashType;
 const {BufferMap} = require('buffer-map');
 
 const getRing = utils.getCommands('data/getRing.json');
+const getParentFingerprint = utils.getCommands('data/getParentFP.json');
 const getTrustedInput = utils.getCommands('data/getTrustedInput.json');
 const hashTxStart = utils.getCommands('data/hashTransactionStart.json');
 const hashOutputFinalize = utils.getCommands('data/hashOutputFinalize.json');
@@ -33,6 +35,10 @@ const multisigTX1 = utils.getCommands('data/tx-p2sh-mulsig.json');
 const wtx1 = utils.getCommands('data/wtx1.json');
 const multisigWTX1 = utils.getCommands('data/tx-p2wsh-mulsig.json');
 
+const firmwareInformation = utils.getCommands('data/firmwareVersion.json');
+const operationMode = utils.getCommands('data/operationMode.json');
+const signMessages = utils.getCommands('data/signMessages.json');
+
 describe('Bitcoin App', function () {
   let device, bcoinApp, btcApp;
 
@@ -40,6 +46,66 @@ describe('Bitcoin App', function () {
     device = new Device();
     bcoinApp = new LedgerBcoin({ device });
     btcApp = new LedgerBTC(device);
+  });
+
+  it('should get firmware version', async () => {
+    const {data, responses, commands} = firmwareInformation;
+
+    device.set({ responses });
+
+    const info = await bcoinApp.getFirmwareVersion();
+    const deviceCommands = device.getCommands();
+
+    assert.strictEqual(deviceCommands.length, 1);
+    assert.bufferEqual(deviceCommands[0], commands[0]);
+
+    assert.deepStrictEqual(info, data.info);
+  });
+
+  it('should get and set operation mode', async () => {
+    const {data, responses, commands} = operationMode;
+
+    device.set({ responses });
+
+    const mode = await bcoinApp.getOperationMode();
+
+    assert.deepStrictEqual(mode, data.operationMode);
+
+    await bcoinApp.setOperationMode(mode.mode);
+
+    const deviceCommands = device.getCommands();
+
+    assert.strictEqual(deviceCommands.length, 2);
+    assert.bufferEqual(deviceCommands[0], commands[0]);
+    assert.bufferEqual(deviceCommands[1], commands[1]);
+  });
+
+  it('should get random bytes', async () => {
+    const responses = [
+      Buffer.from('1d6bd12e842c2ee601f41c496054cc2b470280599000', 'hex')
+    ];
+
+    const expected = Buffer.from(
+      '1d6bd12e842c2ee601f41c496054cc2b47028059',
+      'hex'
+    );
+
+    const expectedCommand = Buffer.from('e0c0000014', 'hex');
+
+    device.set({ responses });
+
+    const randomBytes = await bcoinApp.randomBytes(20);
+
+    assert.bufferEqual(randomBytes, expected,
+      'Could not get random bytes correctly.');
+
+    const deviceCommands = device.getCommands();
+
+    assert.strictEqual(deviceCommands.length, 1,
+      'Incorrect number of commands.');
+
+    assert.bufferEqual(deviceCommands[0], expectedCommand,
+      'Incorrect first message.');
   });
 
   it('should get ring from pubkey', async () => {
@@ -69,6 +135,30 @@ describe('Bitcoin App', function () {
 
     // ring checks
     assert.strictEqual(ring.getPublicKey('hex'), data.pubkey);
+  });
+
+  it('should get parent fingerprint', async () => {
+    const {data, responses, commands} = getParentFingerprint;
+
+    device.set({ responses });
+
+    bcoinApp.set({
+      network: 'main'
+    });
+
+    const path = data.path;
+    const hd = await bcoinApp.getPublicKey(path, true);
+
+    assert.strictEqual(hd.parentFingerPrint, data.parentFingerPrint);
+    assert.strictEqual(hd.publicKey.toString('hex'), data.publicKey);
+
+    const deviceCommands = device.getCommands();
+
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.bufferEqual(deviceCommand, commands[i],
+        `Message ${i} wasn't correct`
+      );
+    }
   });
 
   it('should handle getTrustedInput commands', async () => {
@@ -272,7 +362,7 @@ describe('Bitcoin App', function () {
   });
 
   it('should sign P2WSH transaction', async () => {
-    const {data, tx, commands, responses } = multisigWTX1;
+    const {data, tx, commands, responses} = multisigWTX1;
 
     device.set({ responses });
 
@@ -298,6 +388,123 @@ describe('Bitcoin App', function () {
     assert.bufferEqual(mtx.toRaw(), Buffer.from(data.signedTX, 'hex'),
       'Transaction was not signed properly'
     );
+  });
+
+  it('should sign abritrary messages', async () => {
+    const {
+      path,
+      publicKey,
+      messagesToSign,
+      signatures,
+      commands,
+      responses
+    } = signMessages.data;
+
+    device.set({
+      responses: responses.map(r => Buffer.from(r, 'hex'))
+    });
+
+    for (const [i, message] of messagesToSign.entries()) {
+      const msgbuf = Buffer.from(message, 'hex');
+      const signature = await bcoinApp.signMessage(path, msgbuf);
+
+      assert.strictEqual(
+        signature.toString('hex'),
+        signatures[i],
+        ''
+      );
+
+      const recPubKey = signature.recoverMessage(msgbuf);
+      assert.strictEqual(recPubKey.toString('hex'), publicKey);
+      assert.ok(signature.verifyMessage(msgbuf, recPubKey));
+    }
+
+    const deviceCommands = device.getCommands();
+    assert.strictEqual(deviceCommands.length, commands.length);
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.strictEqual(deviceCommand.toString('hex'), commands[i],
+        `Message ${i} was not correct.`
+      );
+    }
+  });
+
+  it('should sign abritrary messages(legacy)', async () => {
+    const {
+      path,
+      publicKey,
+      messagesToSign,
+      signaturesLegacy,
+      commandsLegacy,
+      responsesLegacy
+    } = signMessages.data;
+
+    device.set({
+      responses: responsesLegacy.map(r => Buffer.from(r, 'hex'))
+    });
+
+    for (const [i, message] of messagesToSign.entries()) {
+      const msgbuf = Buffer.from(message, 'hex');
+
+      if (signaturesLegacy[i] == null) {
+        let err;
+
+        try {
+          await bcoinApp.signMessageLegacy(path, msgbuf);
+        } catch (e) {
+          err = e;
+        }
+
+        assert(err);
+        assert.strictEqual(err.message, 'Message + path is too big.');
+        continue;
+      }
+
+      const signature = await bcoinApp.signMessageLegacy(path, msgbuf);
+      assert.equal(signature.toString('hex'), signaturesLegacy[i]);
+
+      assert.ok(signature.verifyMessage(msgbuf, Buffer.from(publicKey, 'hex')));
+    }
+
+    const deviceCommands = device.getCommands();
+
+    assert.strictEqual(deviceCommands.length, commandsLegacy.length);
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.strictEqual(deviceCommand.toString('hex'), commandsLegacy[i],
+        `Message ${i} was not correct.`
+      );
+    }
+  });
+
+  it('should verify signed messages from ledger', async () => {
+    const {
+      path,
+      messagesToSign,
+      signatures,
+      commandsVerify,
+      responsesVerify
+    } = signMessages.data;
+
+    device.set({
+      responses: responsesVerify.map(r => Buffer.from(r, 'hex'))
+    });
+
+    for (const [i, message] of messagesToSign.entries()) {
+      const msgbuf = Buffer.from(message, 'hex');
+      const sig = LedgerSignature.fromLedgerSignature(
+        Buffer.from(signatures[i], 'hex')
+      );
+
+      const verify = await bcoinApp.verifyMessage(path, msgbuf, sig);
+      assert.strictEqual(verify, true, `Verification failed for message #${i}`);
+    }
+
+    const deviceCommands = device.getCommands();
+    assert.strictEqual(deviceCommands.length, responsesVerify.length);
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.strictEqual(deviceCommand.toString('hex'), commandsVerify[i],
+        `Message ${i} was not correct.`
+      );
+    }
   });
 });
 

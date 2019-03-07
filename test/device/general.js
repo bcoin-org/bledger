@@ -6,6 +6,7 @@
 const assert = require('../util/assert');
 const bledger = require('../../lib/bledger');
 const fundUtil = require('../util/fund');
+const {encodeMessage} = require('../../lib/protocol/common');
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const MTX = require('bcoin/lib/primitives/mtx');
@@ -45,6 +46,31 @@ module.exports = function (Device, DeviceInfo) {
       bcoinApp = new LedgerBcoin({ device });
     });
 
+    it('should get firmware version', async () => {
+      const info = await bcoinApp.getFirmwareVersion();
+
+      assert.ok(/^\w+\.\w+\.\w+$/.test(info.version));
+      assert.strictEqual(typeof info.archID, 'number');
+      assert.strictEqual(typeof info.tcsLoaderPatchVersion, 'number');
+      assert.strictEqual(typeof info.features, 'object');
+      assert.strictEqual(typeof info.mode, 'object');
+
+      const features = [
+        'compressedPubkey',
+        'selfScreenButtons',
+        'externalScreenButtons',
+        'nfc',
+        'ble',
+        'tee'
+      ];
+
+      for (const feature of features)
+        assert.strictEqual(typeof info.features[feature], 'boolean');
+
+      assert.strictEqual(typeof info.mode.setup, 'boolean');
+      assert.strictEqual(typeof info.mode.operation, 'boolean');
+    });
+
     it('should get public key and correctly derive', async () => {
       const path = ACCOUNT;
       const xpubHD = await bcoinApp.getPublicKey(path);
@@ -62,17 +88,25 @@ module.exports = function (Device, DeviceInfo) {
 
       for (const path of Object.keys(paths)) {
         const derivedHD = paths[path];
-        const pubHD = await bcoinApp.getPublicKey(path);
+        // NOTE: This will be relatively slow, because
+        // we are requesting two pubkeys instead of one.
+        const pubHD = await bcoinApp.getPublicKey(path, true);
 
         assert.strictEqual(pubHD.depth, derivedHD.depth, 'depth did not match');
         assert.strictEqual(pubHD.childIndex, derivedHD.childIndex,
-          'childIndex did not match'
+          'childIndex did not match.'
         );
         assert.bufferEqual(pubHD.chainCode, derivedHD.chainCode,
-          'chainCode did not match'
+          'chainCode did not match.'
         );
         assert.bufferEqual(pubHD.publicKey, derivedHD.publicKey,
-          'publicKey did not match'
+          'publicKey did not match.'
+        );
+
+        assert.strictEqual(
+          pubHD.parentFingerPrint,
+          derivedHD.parentFingerPrint,
+          'parentFingerPrint did not match.'
         );
       }
     });
@@ -458,6 +492,31 @@ module.exports = function (Device, DeviceInfo) {
 
       assert.ok(tx.verify(), 'Transaction was not signed');
     });
+
+    for (const legacy of [false, true]) {
+      const suffix = legacy ? ' (legacy)' : '';
+
+      it(`should sign arbitrary message ${suffix}`, async () => {
+        const path = PATH1;
+        const pubHD = await bcoinApp.getPublicKey(path);
+        const pubkey = pubHD.publicKey;
+        const message = 'Hello bledger!';
+        const hash = encodeMessage(Buffer.from(message, 'binary'));
+
+        let lsig;
+        if (legacy)
+          lsig = await bcoinApp.signMessageLegacy(path, message);
+        else
+          lsig = await bcoinApp.signMessage(path, message);
+
+        const recoveredPublicKey = lsig.recoverMessage(message, true);
+
+        assert.bufferEqual(pubkey, recoveredPublicKey,
+          'Could not recover public key.');
+        assert.ok(lsig.verifyMessage(message, pubkey));
+        assert.ok(lsig.verify(hash, pubkey));
+      });
+    }
   });
 };
 
