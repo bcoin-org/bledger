@@ -26,3 +26,6 @@
 `getPublicKey(path, parentFingerPrint = false, addressFlags = 0)`
     - `parentFingerPrint = 1` will return parentFingerprint with `HDPublicKey`
     object.
+
+### Notes
+  - Removed karma in favor of `bmocha`.

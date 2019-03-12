@@ -1,6 +1,6 @@
 {
   "name": "bledger",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Communication and management of ledger devices",
   "keywords": [
     "Bitcoin",
@@ -41,11 +41,11 @@
   },
   "dependencies": {
     "bcrypto": "~3.0.2",
-    "blgr": "~0.1.5",
+    "blgr": "^0.1.6",
     "bmutex": "~0.1.5",
-    "bsert": "~0.0.8",
-    "buffer-map": "0.0.5",
-    "bufio": "~1.0.4"
+    "bsert": "0.0.9",
+    "buffer-map": "0.0.6",
+    "bufio": "^1.0.5"
   },
   "optionalDependencies": {
     "node-hid": "^0.7.3",
@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "bcoin": "^1.0.2",
-    "bmocha": "^1.0.1"
+    "bmocha": "^1.5.0"
   },
   "engines": {
     "node": ">=8.0.0"
