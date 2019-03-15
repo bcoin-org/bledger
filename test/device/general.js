@@ -6,7 +6,7 @@
 const assert = require('../util/assert');
 const bledger = require('../../lib/bledger');
 const fundUtil = require('../util/fund');
-const {encodeMessage} = require('../../lib/protocol/common');
+const {hashMessage} = require('../../lib/protocol/common');
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const MTX = require('bcoin/lib/primitives/mtx');
@@ -501,7 +501,7 @@ module.exports = function (Device, DeviceInfo) {
         const pubHD = await bcoinApp.getPublicKey(path);
         const pubkey = pubHD.publicKey;
         const message = 'Hello bledger!';
-        const hash = encodeMessage(Buffer.from(message, 'binary'));
+        const hash = hashMessage(Buffer.from(message, 'binary'));
 
         let lsig;
         if (legacy)

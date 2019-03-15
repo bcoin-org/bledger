@@ -158,7 +158,7 @@ describe('Signature', function () {
 
   it('should encode message', () => {
     const msgbuf = Buffer.from(vector.originalMessage);
-    const hash = common.encodeMessage(msgbuf);
+    const hash = common.hashMessage(msgbuf);
 
     assert.bufferEqual(hash, vector.messageHash);
   });
