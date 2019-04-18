@@ -3,7 +3,7 @@
 
 'use strict';
 
-const assert = require('../util/assert');
+const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 const fundUtil = require('../util/fund');
 const {hashMessage} = require('../../lib/protocol/common');

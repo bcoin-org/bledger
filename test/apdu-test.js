@@ -3,7 +3,7 @@
 
 'use strict';
 
-const assert = require('./util/assert');
+const assert = require('bsert');
 const LedgerProtocol = require('../lib/protocol');
 const {LedgerError} = LedgerProtocol;
 const {APDUCommand} = LedgerProtocol;
@@ -100,7 +100,7 @@ describe('APDU', function () {
     const data = Buffer.from('ffff', 'hex');
     const command = APDUCommand.getTrustedInput(data, true);
 
-    assert.instanceOf(command, APDUCommand);
+    assert.ok(command instanceof APDUCommand);
     assert.strictEqual(command.p1, 0x00);
     assert.strictEqual(command.cla, CLA_GENERAL);
     assert.strictEqual(command.ins, INS_GET_TRUSTED_INPUT);
@@ -111,7 +111,7 @@ describe('APDU', function () {
     const data = Buffer.from('ffff', 'hex');
     const command = APDUCommand.getTrustedInput(data, false);
 
-    assert.instanceOf(command, APDUCommand);
+    assert.ok(command instanceof APDUCommand);
     assert.strictEqual(command.p1, 0x80);
     assert.strictEqual(command.cla, CLA_GENERAL);
     assert.strictEqual(command.ins, INS_GET_TRUSTED_INPUT);
@@ -123,7 +123,7 @@ describe('APDU', function () {
 
     const response = APDUResponse.getTrustedInput(continueResponse);
 
-    assert.instanceOf(response, APDUResponse);
+    assert.ok(response instanceof APDUResponse);
     assert.strictEqual(response.status, SW_OK);
     assert.strictEqual(response.type, INS_GET_TRUSTED_INPUT);
     assert.strictEqual(response.data.length, 0);

@@ -3,7 +3,7 @@
 
 'use strict';
 
-const assert = require('./util/assert');
+const assert = require('bsert');
 const LedgerProtocol = require('../lib/protocol');
 const {ProtocolWriter} = LedgerProtocol;
 const {ProtocolReader} = LedgerProtocol;

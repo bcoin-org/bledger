@@ -4,7 +4,7 @@
 
 'use strict';
 
-const assert = require('./util/assert');
+const assert = require('bsert');
 const utils = require('./util/utils');
 
 const {Device} = require('./util/device');

@@ -3,7 +3,7 @@
 
 'use strict';
 
-const assert = require('../util/assert');
+const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 
 const {Device, DeviceInfo} = bledger.HID;
