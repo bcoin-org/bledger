@@ -240,6 +240,7 @@ function renderChosen(element, manager, info) {
 
     const bcoin = new LedgerBcoin({ device });
 
+    console.log('getting public key..');
     const xpub = await bcoin.getPublicKey(`m/44'/0'/0'`);
     console.log('--xpub:', xpub);
   });
