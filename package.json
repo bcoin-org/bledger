@@ -30,6 +30,7 @@
     "test-ci": "nyc --reporter=lcov --reporter=text -a -n 'lib/**/*.js' npm test",
     "test-hid": "bmocha --reporter spec test/device/hid-test.js",
     "test-u2f": "./scripts/bmocha-chrome test/device/u2f-test.js",
+    "test-webusb": "./scripts/bmocha-chrome test/device/webusb-test.js",
     "webpack": "webpack --config .config/webpack.js",
     "webpack-dev": "webpack --config .config/webpack.dev.js",
     "webpack-devdeps": "webpack --config .config/webpack.devdeps.js",

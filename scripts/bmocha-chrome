@@ -10,5 +10,5 @@ fi
   --ssl-key=.certs/key.pem \
   --ssl-cert=.certs/cert.pem \
   --open \
-  -m "$BMOCHA_CHROME --ignore-certificate-errors --disable-gpu" \
+  -m "$BMOCHA_CHROME --allow-insecure-localhost --disable-gpu" \
   "${@}"
