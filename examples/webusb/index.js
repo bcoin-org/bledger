@@ -6,6 +6,7 @@ const bledger = require('../..');
 const {LedgerBcoin} = bledger;
 const {Device} = bledger.WebUSB;
 const {DeviceInfo} = bledger.WebUSB;
+const KeyRing = require('bcoin/lib/primitives/keyring');
 
 const usb = navigator.usb;
 
@@ -240,9 +241,19 @@ function renderChosen(element, manager, info) {
 
     const bcoin = new LedgerBcoin({ device });
 
-    console.log('getting public key..');
-    const xpub = await bcoin.getPublicKey(`m/44'/0'/0'`);
-    console.log('--xpub:', xpub);
+    const accountKey = await bcoin.getPublicKey(`m/44'/0'/0'`);
+
+    const pubkeyInformation = `
+    Account: m/44'/0'/0'
+    xpub: ${accountKey.xpubkey()}
+
+    First Receive Address: ${deriveAddress(accountKey, 0, 0, 'main')}
+    First Change Address: ${deriveAddress(accountKey, 1, 0, 'main')}
+    `;
+
+    const pubkeyElement = document.createElement('span');
+    pubkeyElement.innerText = pubkeyInformation;
+    element.appendChild(pubkeyElement);
   });
 
   const information = document.createElement('span');
@@ -269,4 +280,11 @@ function deviceInfoAll(info) {
 function removeChildren(element) {
   while (element.firstChild)
     element.removeChild(element.firstChild);
+}
+
+function deriveAddress(hd, change, index, network) {
+  const pubkey = hd.derive(change).derive(index);
+  const keyring = KeyRing.fromPublic(pubkey.publicKey, network);
+
+  return keyring.getAddress().toString();
 }
