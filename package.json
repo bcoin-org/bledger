@@ -24,8 +24,8 @@
   "scripts": {
     "browserify": "browserify -s bledger lib/bledger.js | uglifyjs -c > bledger.js",
     "clean": "rm -rf bledger.js build/vendor* .config/certs/* ./docs ./coverage",
-    "lint": "eslint lib/ test/ || exit 0",
-    "lint-ci": "eslint lib/ test/",
+    "lint": "eslint examples/ lib/ test/ || exit 0",
+    "lint-ci": "eslint examples/ lib/ test/",
     "test": "bmocha --reporter spec test/*-test.js",
     "test-ci": "nyc --reporter=lcov --reporter=text -a -n 'lib/**/*.js' npm test",
     "test-hid": "bmocha --reporter spec test/device/hid-test.js",

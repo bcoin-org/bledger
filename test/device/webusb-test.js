@@ -1,4 +1,4 @@
-/* eslint-env mocha */
+/* eslint-env mocha, browser */
 /* eslint prefer-arrow-callback: "off" */
 
 'use strict';
