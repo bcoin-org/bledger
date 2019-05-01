@@ -40,13 +40,13 @@
     "./lib/bledger": "./lib/bledger-browser.js"
   },
   "dependencies": {
-    "bcrypto": "^3.1.5",
+    "bcrypto": "^3.1.6",
     "blgr": "^0.1.7",
     "bmutex": "^0.1.6",
     "bsert": "0.0.10",
     "buffer-map": "0.0.7",
     "bufio": "^1.0.6",
-    "node-hid": "git+https://github.com/bcoin-org/node-hid-ng.git#master"
+    "node-hid-ng": "^1.0.0"
   },
   "optionalDependencies": {
     "u2f-api": "^1.0.8"
