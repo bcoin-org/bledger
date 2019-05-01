@@ -41,13 +41,15 @@
   },
   "dependencies": {
     "bcrypto": "^3.1.6",
-    "bcoin": "git+https://github.com/bcoin-org/bcoin.git#master",
     "blgr": "^0.1.7",
     "bmutex": "^0.1.6",
     "bsert": "0.0.10",
     "buffer-map": "0.0.7",
     "bufio": "^1.0.6",
     "node-hid-ng": "^1.0.1"
+  },
+  "peerDependencies": {
+    "bcoin": "github:bcoin-org/bcoin#master"
   },
   "optionalDependencies": {
     "u2f-api": "^1.0.8"
