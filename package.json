@@ -45,10 +45,10 @@
     "bmutex": "^0.1.6",
     "bsert": "0.0.10",
     "buffer-map": "0.0.7",
-    "bufio": "^1.0.6",
-    "node-hid-ng": "^1.0.0"
+    "bufio": "^1.0.6"
   },
   "optionalDependencies": {
+    "node-hid-ng": "^1.0.1",
     "u2f-api": "^1.0.8"
   },
   "peerDependencies": {
