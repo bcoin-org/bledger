@@ -65,8 +65,8 @@ class DeviceManager {
 
   _addDevice(info) {
     assert(info.device, 'Could not find device.');
-    if (!DeviceInfo.isLedgerDevice(info.device))
-      return;
+    assert(DeviceInfo.isLedgerDevice(info.device),
+      'Device is not ledger.');
 
     let deviceInfo;
 
@@ -97,7 +97,7 @@ class DeviceManager {
     this.deviceInfos.delete(deviceInfo);
     this.devices.delete(info.device);
 
-    return null;
+    return;
   }
 
   getDevices() {
@@ -105,7 +105,7 @@ class DeviceManager {
   }
 
   /**
-   * Only UA can have an access to this.
+   * Only User Action can have an access to this.
    * Otherwise this will fail.
    */
 
@@ -143,8 +143,6 @@ class DeviceManager {
 
     await this.device.close();
 
-    console.log('device closed');
-
     this.selected = null;
     this.device = null;
   }
@@ -155,7 +153,7 @@ const chooseBtn = document.getElementById('choose');
 const chosenDiv = document.getElementById('chosen');
 const devicesDiv = document.getElementById('devices');
 
-chooseBtn.addEventListener('click', async (event) => {
+chooseBtn.addEventListener('click', async () => {
   const device = await manager.requestDevice();
 
   await manager.openDevice(device);
@@ -171,12 +169,9 @@ global.addEventListener('load', async () => {
 
 // We rerender all the time..
 // Use framework or something.
-
 function renderManager() {
   const selected = manager.selected;
   const devices = manager.getDevices();
-
-  console.log('Rendering page.', manager.selected);
 
   renderChosen(chosenDiv, manager, selected);
   renderDevices(devicesDiv, manager, devices);
@@ -211,7 +206,6 @@ function renderDevice(element, manager, info) {
   element.appendChild(container);
 }
 
-// NOTE: I don't take care of the unlisted DOM elements.
 function renderChosen(element, manager, info) {
   removeChildren(element);
 
@@ -235,14 +229,12 @@ function renderChosen(element, manager, info) {
     const device = manager.device;
 
     if (!device) {
-      alert('WTF..');
+      alert('Could not find device..');
       return;
     }
 
     const bcoin = new LedgerBcoin({ device });
-
-    const accountKey = await bcoin.getPublicKey(`m/44'/0'/0'`);
-
+    const accountKey = await bcoin.getPublicKey('m/44\'/0\'/0\'');
     const pubkeyInformation = `
     Account: m/44'/0'/0'
     xpub: ${accountKey.xpubkey()}
