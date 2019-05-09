@@ -3,22 +3,31 @@
 const bledger = require('../lib/bledger');
 const {LedgerBcoin} = bledger;
 const {Device} = bledger.HID;
+const Logger = require('blgr');
 
 (async () => {
+  const logger = new Logger({
+    console: true,
+    level: 'info'
+  });
+
+  await logger.open();
   const devices = await Device.getDevices();
 
   const device = new Device({
     device: devices[0],
-    timeout: 5000
+    timeout: 5000,
+    logger
   });
 
   await device.open();
+
+  const ledgerBcoin = new LedgerBcoin({ device, logger });
 
   const purpose = 44;
   const coinType = 0;
 
   const path = `m/${purpose}'/${coinType}'/0/0`;
-  const ledgerBcoin = new LedgerBcoin({ device });
 
   const message = 'Hello bledger!';
   const hdpub = await ledgerBcoin.getPublicKey(path);

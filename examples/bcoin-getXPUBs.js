@@ -30,7 +30,7 @@ const CHANGE = true;
 
   await device.open();
 
-  const ledgerBcoin = new LedgerBcoin({ device });
+  const ledgerBcoin = new LedgerBcoin({ device, logger });
 
   const xpubs = {};
 

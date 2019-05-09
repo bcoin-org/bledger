@@ -6,6 +6,7 @@ const {Device} = bledger.HID;
 const MTX = require('bcoin/lib/primitives/mtx');
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const fundUtil = require('../test/util/fund');
+const Logger = require('blgr');
 
 const ring = KeyRing.generate();
 ring.witness = true;
@@ -13,18 +14,24 @@ ring.witness = true;
 const randWitness = ring.getAddress();
 
 (async () => {
+  const logger = new Logger({
+    console: true,
+    level: 'info'
+  });
+
+  await logger.open();
+
   const devices = await Device.getDevices();
 
   const device = new Device({
     device: devices[0],
-    timeout: 5000
+    timeout: 5000,
+    logger
   });
 
   await device.open();
 
-  const bcoinApp = new LedgerBcoin({
-    device: device
-  });
+  const bcoinApp = new LedgerBcoin({ device, logger });
 
   // Create witness address
   const path = 'm/44\'/0\'/1\'/0/0';

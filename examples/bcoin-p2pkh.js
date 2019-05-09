@@ -34,7 +34,7 @@ const fundUtil = require('../test/util/fund');
    * with little change left
    */
 
-  const ledgerBcoin = new LedgerBcoin({ device });
+  const ledgerBcoin = new LedgerBcoin({ device, logger });
 
   const account = 'm/44/0\'/0\'';
   const accinfo = [
