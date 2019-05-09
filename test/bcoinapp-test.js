@@ -45,7 +45,7 @@ describe('Bitcoin App', function () {
   beforeEach(() => {
     device = new Device();
     bcoinApp = new LedgerBcoin({ device });
-    btcApp = new LedgerBTC(device);
+    btcApp = new LedgerBTC({ device });
   });
 
   it('should get firmware version', async () => {
