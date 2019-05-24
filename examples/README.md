@@ -1,7 +1,8 @@
 Examples
 ===
 
-There are two ways to communicate with Ledger Device. From browser using `u2f` and using `HID` from nodejs.
+There are three ways to communicate with Ledger Device.
+From browser using `webusb` and `webauthn` and using `HID` from nodejs.
 Most of the examples are on node.js.
 
 * [./bcoin-getPublicKey.js][getPublicKey] - Get public key for BIP32 path.
@@ -11,7 +12,8 @@ Most of the examples are on node.js.
 * [./bcoin-getP2SH-address.js][getP2SHaddr] - Get P2SH address.
 * [./bcoin-spendP2SH.js][spendP2SH] - Sign P2SH transaction.
 * [./bcoin-p2wpkh.js][p2wpkh] - Sign P2WPKH transaction.
-* [./u2f/index.js][u2fXPUBs] - U2F usage from browser to get XPUB and derive keys.
+* [./webusb/index.js][webusb-demo] - WebUSB Demo.
+* [./webauthn/index.js][webauthn-XPUBS] - WebAuthn example for browser to get XPUB and derive keys.
 
 [getPublicKey]: ./bcoin-getPublicKey.js
 [getXPUBs]: ./bcoin-getXPUBs.js
@@ -20,4 +22,5 @@ Most of the examples are on node.js.
 [spendP2SH]: ./bcoin-spendP2SH.js
 [p2wpkh]: ./bcoin-p2wpkh.js
 [verify]: ./bcoin-verifyAddress.js
-[u2fXPUBs]: ./u2f/index.js
+[webauthn-XPUBS]: ./webauthn/index.js
+[webusb-demo]: ./webusb/index.js
