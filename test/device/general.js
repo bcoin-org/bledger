@@ -16,7 +16,7 @@ const hashType = Script.hashType;
 const {LedgerBcoin, LedgerTXInput} = bledger;
 const ADDRESS = '3Bi9H1hzCHWJoFEjc4xzVzEMywi35dyvsV';
 
-const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
+const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 40000;
 
 const m = 'm';
 const ACCOUNT = `${m}/44'/0'/0'`;

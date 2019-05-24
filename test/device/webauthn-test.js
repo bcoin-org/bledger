@@ -6,10 +6,10 @@
 const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 
-const {Device, DeviceInfo} = bledger.U2F;
+const {Device, DeviceInfo} = bledger.WebAuthn;
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 40000;
 
-describe('U2F Device', function () {
+describe('WebAuthn Device', function () {
   this.timeout(DEVICE_TIMEOUT);
 
   it('should list devices', async () => {

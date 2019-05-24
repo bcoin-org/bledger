@@ -1,9 +1,9 @@
 'use strict';
 /* eslint-env browser */
 
-const bledger = require('bledger');
+const bledger = require('../..');
 const {LedgerBcoin} = bledger;
-const {Device} = bledger.U2F;
+const {Device} = bledger.WebAuthn;
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 
@@ -12,12 +12,11 @@ const XPUBS = 1;
 const ADDRESSES = 4;
 const CHANGE = true;
 
-(async () => {
-  const device = new Device({
-    scrambleKey: 'btc',
-    timeout: 20000
-  });
+const device = new Device({
+  timeout: 20000
+});
 
+(async () => {
   await device.open();
 
   const ledgerBcoin = new LedgerBcoin({ device });
@@ -45,12 +44,8 @@ const CHANGE = true;
       }
     }
   }
-
   await device.close();
-})().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+})();
 
 async function getPublicKey(btcApp, path) {
   return await btcApp.getPublicKey(path);

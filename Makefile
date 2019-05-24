@@ -1,20 +1,5 @@
 all:
-	@npm run webpack
-
-browserify:
-	@npm run browserify
-
-webpack:
-	@npm run webpack
-
-webpack-dev: ./build/vendor.js
-	@npm run webpack-dev
-
-./build/vendor.js:
-	@npm run webpack-devdeps
-
-webpack-devdeps:
-	@npm run webpack-devdeps
+	@echo "Nothing to build."
 
 .certs:
 	mkdir .certs
@@ -37,8 +22,11 @@ test:
 test-hid:
 	@npm run test-hid
 
-test-u2f: .certs/cert.pem
-	@npm run test-u2f
+test-webusb: .certs/cert.pem
+	@npm run test-webusb
+
+test-webauthn: .certs/cert.pem
+	@npm run test-webauthn
 
 docs:
 	@npm run docs
@@ -46,5 +34,5 @@ docs:
 cover:
 	@npm run cover
 
-.PHONY: all browserify webpack webpack-dev webpack-devdeps clean lint test test-u2f test-hid cert docs
+.PHONY: all clean lint test test-hid test-webusb test-webauthn cert docs
 
