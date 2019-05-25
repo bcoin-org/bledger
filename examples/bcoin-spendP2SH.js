@@ -6,13 +6,14 @@ const {Script} = require('bcoin/lib/script');
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin, LedgerTXInput} = bledger;
-const {Device} = bledger.HID;
+const {Device} = bledger.USB;
 const Logger = require('blgr');
 
 const fundUtil = require('../test/util/fund');
 
 (async () => {
-  const devices = await Device.getDevices();
+  // get first device info available.
+  const deviceInfo = await Device.requestDevice();
 
   const logger = new Logger({
     console: true,
@@ -22,7 +23,7 @@ const fundUtil = require('../test/util/fund');
   await logger.open();
 
   const device = new Device({
-    device: devices[0],
+    device: deviceInfo,
     timeout: 20000,
     logger: logger
   });

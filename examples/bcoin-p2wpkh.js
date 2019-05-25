@@ -2,7 +2,7 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin, LedgerTXInput} = bledger;
-const {Device} = bledger.HID;
+const {Device} = bledger.USB;
 const MTX = require('bcoin/lib/primitives/mtx');
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const fundUtil = require('../test/util/fund');
@@ -21,10 +21,11 @@ const randWitness = ring.getAddress();
 
   await logger.open();
 
-  const devices = await Device.getDevices();
+  // get first device info available.
+  const deviceInfo = await Device.requestDevice();
 
   const device = new Device({
-    device: devices[0],
+    device: deviceInfo,
     timeout: 5000,
     logger
   });

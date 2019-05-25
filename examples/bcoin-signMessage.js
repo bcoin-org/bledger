@@ -2,7 +2,7 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin} = bledger;
-const {Device} = bledger.HID;
+const {Device} = bledger.USB;
 const Logger = require('blgr');
 
 (async () => {
@@ -12,10 +12,12 @@ const Logger = require('blgr');
   });
 
   await logger.open();
-  const devices = await Device.getDevices();
+
+  // get first device info available.
+  const deviceInfo = await Device.requestDevice();
 
   const device = new Device({
-    device: devices[0],
+    device: deviceInfo,
     timeout: 5000,
     logger
   });

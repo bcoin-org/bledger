@@ -2,7 +2,7 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin} = bledger;
-const {Device} = bledger.HID;
+const {Device} = bledger.USB;
 const Logger = require('blgr');
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
@@ -13,7 +13,8 @@ const ADDRESSES = 4;
 const CHANGE = true;
 
 (async () => {
-  const devices = await Device.getDevices();
+  // get first device info available.
+  const deviceInfo = await Device.requestDevice();
 
   const logger = new Logger({
     console: true,
@@ -23,7 +24,7 @@ const CHANGE = true;
   await logger.open();
 
   const device = new Device({
-    device: devices[0],
+    device: deviceInfo,
     timeout: 5000,
     logger
   });
