@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/bcoin-org/bledger#readme",
   "scripts": {
-    "clean": "rm -rf bledger.js build/vendor* .config/certs/* ./docs ./coverage",
+    "clean": "rm -rf bledger.js build/vendor* .config/certs/* ./docs ./coverage examples/webauthn/app.js examples/webusb/app.js",
     "lint": "eslint examples/ lib/ test/ || exit 0",
     "lint-ci": "eslint examples/ lib/ test/",
     "test": "bmocha --reporter spec test/*-test.js",
