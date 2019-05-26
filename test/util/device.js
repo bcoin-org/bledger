@@ -7,7 +7,7 @@
 'use strict';
 
 const assert = require('bsert');
-const {Device} = require('../../lib/devices/device');
+const {Device} = require('../../lib/device/device');
 
 class TestDevice extends Device {
   constructor(options) {
