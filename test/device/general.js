@@ -23,7 +23,7 @@ const ACCOUNT = `${m}/44'/0'/0'`;
 const PATH1 = `${ACCOUNT}/0/0`;
 const PATH2 = `${ACCOUNT}/1/0`;
 
-module.exports = function (Device, DeviceInfo) {
+module.exports = function (Device) {
   describe('General Device', function () {
     this.timeout(DEVICE_TIMEOUT);
 
@@ -32,10 +32,9 @@ module.exports = function (Device, DeviceInfo) {
     before(async () => {
       const devices = await Device.getDevices();
 
-      device = new Device({
-        device: devices[0],
-        timeout: DEVICE_TIMEOUT
-      });
+      device = devices[0];
+
+      device.set({ timeout: DEVICE_TIMEOUT });
 
       await device.open();
     });

@@ -6,7 +6,7 @@
 const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 
-const {Device, DeviceInfo} = bledger.USB;
+const {Device} = bledger.USB;
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 40000;
 
 describe('USB Device (node)', function () {
@@ -22,9 +22,9 @@ describe('USB Device (node)', function () {
     assert.ok(devices.length > 0, 'There should be at least one device');
 
     for (const device of devices)
-      assert.ok(DeviceInfo.isLedgerDevice(device),
+      assert.ok(Device.isLedgerDevice(device),
         'Device should be a ledger device');
   });
 });
 
-require('./general')(Device, DeviceInfo);
+require('./general')(Device);

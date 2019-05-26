@@ -6,7 +6,7 @@
 const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 
-const {Device, DeviceInfo} = bledger.WebAuthn;
+const {Device} = bledger.WebAuthn;
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 40000;
 
 describe('WebAuthn Device', function () {
@@ -19,4 +19,4 @@ describe('WebAuthn Device', function () {
   });
 });
 
-require('./general')(Device, DeviceInfo);
+require('./general')(Device);

@@ -6,7 +6,7 @@
 const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 
-const {Device, DeviceInfo} = bledger.USB;
+const {Device} = bledger.USB;
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 40000;
 
 describe('USB Device (web)', function () {
@@ -37,4 +37,4 @@ describe('USB Device (web)', function () {
   });
 });
 
-require('./general')(Device, DeviceInfo);
+require('./general')(Device);
