@@ -25,7 +25,7 @@ const fundUtil = require('../test/util/fund');
   const device = new Device({
     device: deviceInfo,
     timeout: 20000,
-    logger: logger
+    logger
   });
 
   await device.open();

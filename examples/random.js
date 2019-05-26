@@ -5,12 +5,9 @@ const {LedgerBcoin} = bledger;
 const {Device} = bledger.USB;
 
 (async () => {
-  const deviceInfo = await Device.requestDevice();
+  const device = await Device.requestDevice();
 
-  const device = new Device({
-    device: deviceInfo,
-    timeout: 5000
-  });
+  device.set({ timeout: 5000 });
 
   await device.open();
 

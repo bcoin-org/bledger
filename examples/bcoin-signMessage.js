@@ -8,16 +8,15 @@ const Logger = require('blgr');
 (async () => {
   const logger = new Logger({
     console: true,
-    level: 'info'
+    level: 'debug'
   });
 
   await logger.open();
 
-  // get first device info available.
-  const deviceInfo = await Device.requestDevice();
+  // get first device available.
+  const device = await Device.requestDevice();
 
-  const device = new Device({
-    device: deviceInfo,
+  device.set({
     timeout: 5000,
     logger
   });

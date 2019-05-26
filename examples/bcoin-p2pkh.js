@@ -11,8 +11,6 @@ const Logger = require('blgr');
 const fundUtil = require('../test/util/fund');
 
 (async () => {
-  const deviceInfo = await Device.requestDevice();
-
   const logger = new Logger({
     console: true,
     level: 'info'
@@ -20,8 +18,9 @@ const fundUtil = require('../test/util/fund');
 
   await logger.open();
 
-  const device = new Device({
-    device: deviceInfo,
+  const device = await Device.requestDevice();
+
+  device.set({
     timeout: 20000,
     logger
   });

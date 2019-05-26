@@ -13,9 +13,6 @@ const ADDRESSES = 4;
 const CHANGE = true;
 
 (async () => {
-  // get first device info available.
-  const deviceInfo = await Device.requestDevice();
-
   const logger = new Logger({
     console: true,
     level: 'debug'
@@ -23,8 +20,10 @@ const CHANGE = true;
 
   await logger.open();
 
-  const device = new Device({
-    device: deviceInfo,
+  // get first device available.
+  const device = await Device.requestDevice();
+
+  device.set({
     timeout: 5000,
     logger
   });
