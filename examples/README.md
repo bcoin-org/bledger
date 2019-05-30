@@ -7,7 +7,7 @@ that uses node-usb on node.js side and uses WebUSB in the browser.
 WebAuthn is also available for browsers that support it.
 
 Most of the examples are for node.js, even though code is identical for webusb
-an node.js you still need to User Action in the browser to get access to the device,
+and node.js you still need to User Action in the browser to get access to the device,
 so it's easier to check examples on node.
 
 There's also web usb demo, that handles device.
