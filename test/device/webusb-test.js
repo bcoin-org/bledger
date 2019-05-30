@@ -6,13 +6,13 @@
 const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 
-const {Device, DeviceInfo} = bledger.WebUSB;
+const {Device} = bledger.USB;
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 40000;
 
-describe('WebUSB Device', function () {
+describe('USB Device (web)', function () {
   this.timeout(DEVICE_TIMEOUT);
 
-  // HACK.
+  // WebUSB needs User Action(UA) in order to request device,
   // TODO: Replace with appropriate flag in chrome.
   // (See script/bmocha-chrome)
   before((cb) => {
@@ -37,4 +37,4 @@ describe('WebUSB Device', function () {
   });
 });
 
-require('./general')(Device, DeviceInfo);
+require('./general')(Device);

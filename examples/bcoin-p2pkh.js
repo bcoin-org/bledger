@@ -2,7 +2,7 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin, LedgerTXInput} = bledger;
-const {Device} = bledger.HID;
+const {Device} = bledger.USB;
 const MTX = require('bcoin/lib/primitives/mtx');
 const Amount = require('bcoin/lib/btc/amount');
 const KeyRing = require('bcoin/lib/primitives/keyring');
@@ -11,8 +11,6 @@ const Logger = require('blgr');
 const fundUtil = require('../test/util/fund');
 
 (async () => {
-  const devices = await Device.getDevices();
-
   const logger = new Logger({
     console: true,
     level: 'info'
@@ -20,8 +18,9 @@ const fundUtil = require('../test/util/fund');
 
   await logger.open();
 
-  const device = new Device({
-    device: devices[0],
+  const device = await Device.requestDevice();
+
+  device.set({
     timeout: 20000,
     logger
   });

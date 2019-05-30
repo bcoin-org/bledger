@@ -2,18 +2,16 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin} = bledger;
-const {Device} = bledger.HID;
+const {Device} = bledger.USB;
 const {addressFlags} = LedgerBcoin;
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 
 (async () => {
-  const devices = await Device.getDevices();
+  // get first device available.
+  const device = await Device.requestDevice();
 
-  const device = new Device({
-    device: devices[0],
-    timeout: 60000
-  });
+  device.set({ timeout: 60000 });
 
   await device.open();
 

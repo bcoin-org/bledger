@@ -22,17 +22,14 @@
   },
   "homepage": "https://github.com/bcoin-org/bledger#readme",
   "scripts": {
-    "clean": "rm -rf bledger.js build/vendor* .config/certs/* ./docs ./coverage",
+    "clean": "rm -rf bledger.js build/vendor* .config/certs/* ./docs ./coverage examples/webauthn/app.js examples/webusb/app.js",
     "lint": "eslint examples/ lib/ test/ || exit 0",
     "lint-ci": "eslint examples/ lib/ test/",
     "test": "bmocha --reporter spec test/*-test.js",
     "test-ci": "nyc --reporter=lcov --reporter=text -a -n 'lib/**/*.js' npm test",
-    "test-hid": "bmocha --reporter spec test/device/hid-test.js",
+    "test-usb": "bmocha --reporter spec test/device/usb-test.js",
     "test-webauthn": "./scripts/bmocha-chrome test/device/webauthn-test.js",
     "test-webusb": "./scripts/bmocha-chrome test/device/webusb-test.js",
-    "webpack": "webpack --config .config/webpack.js",
-    "webpack-dev": "webpack --config .config/webpack.dev.js",
-    "webpack-devdeps": "webpack --config .config/webpack.devdeps.js",
     "docs": "jsdoc -c jsdoc.json",
     "cover": "nyc -a -n 'lib/**/*.js' npm test"
   },
@@ -41,28 +38,24 @@
   },
   "dependencies": {
     "bcrypto": "^3.1.6",
-    "blgr": "^0.1.7",
-    "bmutex": "^0.1.6",
-    "bsert": "0.0.10",
-    "buffer-map": "0.0.7",
+    "blgr": "~0.1.7",
+    "bmutex": "~0.1.6",
+    "bsert": "~0.0.10",
+    "buffer-map": "~0.0.7",
     "bufio": "^1.0.6"
   },
   "optionalDependencies": {
-    "node-hid-ng": "^1.0.1"
+    "busb": "0.0.1"
   },
   "peerDependencies": {
     "bcoin": "^1.0.2"
   },
   "devDependencies": {
     "bcoin": "^1.0.2",
-    "bmocha": "^2.1.1"
+    "bmocha": "^2.1.1",
+    "bpkg": "^0.6.0"
   },
   "engines": {
     "node": ">=8.0.0"
-  },
-  "browserify": {
-    "transform": [
-      "babelify"
-    ]
   }
 }

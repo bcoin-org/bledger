@@ -2,10 +2,10 @@
 /* eslint-env browser */
 
 const assert = require('bsert');
+const EventEmitter = require('events');
 const bledger = require('../..');
 const {LedgerBcoin} = bledger;
-const {Device} = bledger.WebUSB;
-const {DeviceInfo} = bledger.WebUSB;
+const {Device} = bledger.USB;
 const KeyRing = require('bcoin/lib/primitives/keyring');
 
 const usb = navigator.usb;
@@ -16,37 +16,56 @@ if (!usb) {
 }
 
 /**
- * @param {DeviceInfo[]} devices
- * @param {DeviceInfo?} selected
+ * @param {Device[]} devices
+ * @param {Device?} selected
  * @param {Device?} device
  */
 
-class DeviceManager {
+class DeviceManager extends EventEmitter {
   constructor() {
-    this.deviceInfos = new Set();
-    this.devices = new Map();
+    super();
+    this.devices = new Set();
+    this.wusbToDevice = new Map();
     this.selected = null;
-    this.device = null;
 
-    this.addDevice = this._addDevice.bind(this);
-    this.removeDevice = this._removeDevice.bind(this);
+    // callbacks for event listener to clean up later.
+    this._addDevice = null;
+    this._removeDevice = null;
   }
 
   bind() {
-    usb.addEventListener('connect', this.addDevice);
-    usb.addEventListener('disconnect', this.removeDevice);
+    this._addDevice = async (event) => {
+      const device = Device.fromDevice(event.device);
+      await this.addDevice(device);
+      this.emit('connect', device);
+    };
+
+    this._removeDevice = async (event) => {
+      const device = Device.fromDevice(event.device);
+      await this.removeDevice(device);
+      this.emit('disconnect', device);
+    };
+
+    usb.addEventListener('connect', this._addDevice);
+    usb.addEventListener('disconnect', this._removeDevice);
   }
 
   unbind() {
-    usb.removeEventListener('connect', this.addDevice);
-    usb.removeEventListener('disconnect', this.removeDevice);
+    assert(this._addDevice);
+    assert(this._removeDevice);
+
+    usb.removeEventListener('connect', this._addDevice);
+    usb.removeEventListener('disconnect', this._removeDevice);
+
+    this._addDevice = null;
+    this._removeDevice = null;
   }
 
   async open() {
     const devices = await Device.getDevices();
 
-    for (const info of devices)
-      this._addDevice(info);
+    for (const device of devices)
+      await this.addDevice(device);
 
     this.bind();
   }
@@ -57,51 +76,44 @@ class DeviceManager {
   }
 
   reset() {
-    this.deviceInfos = new Set();
-    this.devices = new Map();
+    this.devices = new Set();
+    this.wusbToDevice = new Map();
     this.selected = null;
-    this.device = null;
   }
 
-  _addDevice(info) {
-    assert(info.device, 'Could not find device.');
-    assert(DeviceInfo.isLedgerDevice(info.device),
-      'Device is not ledger.');
+  async addDevice(device) {
+    assert(device instanceof Device, 'Could not add device.');
 
-    let deviceInfo;
+    if (this.wusbToDevice.has(device.device))
+      return this.wusbToDevice.get(device.device);
 
-    if (info instanceof DeviceInfo)
-      deviceInfo = info;
-    else
-      deviceInfo = DeviceInfo.fromWebUSBDevice(info.device);
+    this.wusbToDevice.set(device.device, device);
+    this.devices.add(device);
 
-    if (this.devices.has(info.device))
-      return this.devices.get(info.device);
-
-    this.devices.set(info.device, deviceInfo);
-    this.deviceInfos.add(deviceInfo);
-
-    return deviceInfo;
+    return device;
   }
 
-  _removeDevice(info) {
-    assert(info.device, 'Could not find device.');
-    if (!DeviceInfo.isLedgerDevice(info.device))
+  async removeDevice(device) {
+    assert(device.device, 'Could not find device.');
+    if (!Device.isLedgerDevice(device.device))
       return;
 
-    const deviceInfo = this.devices.get(info.device);
+    const mappedDevice = this.wusbToDevice.get(device.device);
 
-    if (!deviceInfo)
+    if (!mappedDevice)
       return;
 
-    this.deviceInfos.delete(deviceInfo);
-    this.devices.delete(info.device);
+    if (this.selected && this.selected.device === mappedDevice.device)
+      await this.closeDevice(this.selected);
+
+    this.devices.delete(mappedDevice);
+    this.wusbToDevice.delete(mappedDevice.device);
 
     return;
   }
 
   getDevices() {
-    return this.deviceInfos.values();
+    return this.devices.values();
   }
 
   /**
@@ -112,39 +124,40 @@ class DeviceManager {
   async requestDevice() {
     const device = await Device.requestDevice();
 
-    return this._addDevice(device);
+    return this.addDevice(device);
   }
 
-  async openDevice(info, timeout = 20000) {
+  async openDevice(device, timeout = 20000) {
     assert(!this.selected, 'Other device already in use.');
-    assert(this.deviceInfos.has(info), 'Could not find device.');
+    assert(this.devices.has(device), 'Could not find device.');
 
-    this.selected = info;
-    this.device = new Device({
-      device: info,
-      timeout: timeout
-    });
+    this.selected = device;
+
+    device.set({ timeout });
 
     try {
-      await this.device.open();
+      await this.selected.open();
+      this.emit('device open', this.selected);
     } catch (e) {
       console.error(e);
       this.selected = null;
-      this.device = null;
     }
 
-    return this.device;
+    return this.selected;
   }
 
-  async closeDevice(info) {
+  async closeDevice(device) {
     assert(this.selected, 'No device in use.');
-    assert(this.deviceInfos.has(info), 'Could not find device.');
-    assert(this.selected === info, 'Can not close closed device.');
+    assert(this.devices.has(device), 'Could not find device.');
+    assert(this.selected === device,
+      'Can not close closed non-selected device.');
 
-    await this.device.close();
+    if (this.selected.opened)
+      await this.selected.close();
+
+    this.emit('device close', this.selected);
 
     this.selected = null;
-    this.device = null;
   }
 }
 
@@ -152,6 +165,9 @@ const manager = new DeviceManager();
 const chooseBtn = document.getElementById('choose');
 const chosenDiv = document.getElementById('chosen');
 const devicesDiv = document.getElementById('devices');
+
+manager.on('connect', renderManager);
+manager.on('disconnect', renderManager);
 
 chooseBtn.addEventListener('click', async () => {
   const device = await manager.requestDevice();
@@ -185,17 +201,17 @@ function renderDevices(element, manager, devices) {
   }
 }
 
-function renderDevice(element, manager, info) {
+function renderDevice(element, manager, device) {
   const container = document.createElement('div');
   const name = document.createElement('span');
   const choose = document.createElement('button');
 
   choose.innerText = 'Open.';
-  name.innerText = deviceInfoMini(info);
+  name.innerText = deviceInfoMini(device);
 
   // we don't clean up listeners.. too much headache
   choose.addEventListener('click', async () => {
-    await manager.openDevice(info);
+    await manager.openDevice(device);
 
     renderManager();
   });
@@ -206,17 +222,17 @@ function renderDevice(element, manager, info) {
   element.appendChild(container);
 }
 
-function renderChosen(element, manager, info) {
+function renderChosen(element, manager, device) {
   removeChildren(element);
 
-  if (!info)
+  if (!device)
     return;
 
   const closeBtn = document.createElement('button');
 
   closeBtn.innerText = 'Close.';
   closeBtn.addEventListener('click', async function close() {
-    await manager.closeDevice(info);
+    await manager.closeDevice(device);
 
     closeBtn.removeEventListener('click', close);
 
@@ -226,7 +242,7 @@ function renderChosen(element, manager, info) {
   const pubkeyBtn = document.createElement('button');
   pubkeyBtn.innerText = 'Get public key';
   pubkeyBtn.addEventListener('click', async () => {
-    const device = manager.device;
+    const device = manager.selected;
 
     if (!device) {
       alert('Could not find device..');
@@ -249,23 +265,23 @@ function renderChosen(element, manager, info) {
   });
 
   const information = document.createElement('span');
-  information.innerText = deviceInfoAll(info);
+  information.innerText = deviceInfoAll(device);
 
   element.appendChild(information);
   element.appendChild(closeBtn);
   element.appendChild(pubkeyBtn);
 }
 
-function deviceInfoMini(info) {
-  return `${info.manufacturerName} - ${info.productName}`;
+function deviceInfoMini(device) {
+  return `${device.manufacturerName} - ${device.productName}`;
 }
 
-function deviceInfoAll(info) {
-  return `VendorID: ${info.vendorId},
-    ProductID: ${info.productId},
-    Manufacturer: ${info.manufacturerName},
-    Product Name: ${info.productName},
-    Serial Number: ${info.serialNumber}
+function deviceInfoAll(device) {
+  return `VendorID: ${device.vendorId},
+    ProductID: ${device.productId},
+    Manufacturer: ${device.manufacturerName},
+    Product Name: ${device.productName},
+    Serial Number: ${device.serialNumber}
   `;
 }
 
