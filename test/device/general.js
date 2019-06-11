@@ -13,7 +13,7 @@ const MTX = require('bcoin/lib/primitives/mtx');
 const Script = require('bcoin/lib/script/script');
 const hashType = Script.hashType;
 
-const {LedgerBcoin, LedgerTXInput} = bledger;
+const {LedgerTXInput} = bledger;
 const ADDRESS = '3Bi9H1hzCHWJoFEjc4xzVzEMywi35dyvsV';
 
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 40000;
@@ -23,8 +23,8 @@ const ACCOUNT = `${m}/44'/0'/0'`;
 const PATH1 = `${ACCOUNT}/0/0`;
 const PATH2 = `${ACCOUNT}/1/0`;
 
-module.exports = function (Device) {
-  describe('General Device', function () {
+module.exports = function (description, Device, LedgerBcoin) {
+  describe(`Device tests (${description})`, function () {
     this.timeout(DEVICE_TIMEOUT);
 
     let bcoinApp, device;
@@ -39,7 +39,10 @@ module.exports = function (Device) {
       await device.open();
     });
 
-    after(async () => await device.close());
+    after(async () => {
+      if (device.opened)
+        await device.close();
+    });
 
     beforeEach(() => {
       bcoinApp = new LedgerBcoin({ device });
