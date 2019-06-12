@@ -8,9 +8,9 @@ const assert = require('bsert');
 const utils = require('./util/utils');
 
 const {Device} = require('./util/device');
-const LedgerBTC = require('../lib/ledger');
-const LedgerBcoin = require('../lib/bcoin');
-const LedgerTXInput = require('../lib/txinput');
+const LedgerBTC = require('../lib/ledger/ledger');
+const LedgerBcoin = require('../lib/ledger/ledgerbcoin');
+const LedgerTXInput = require('../lib/ledger/txinput');
 const LedgerSignature = require('../lib/utils/signature');
 
 const TX = require('bcoin/lib/primitives/tx');

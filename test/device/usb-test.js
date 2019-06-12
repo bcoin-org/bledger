@@ -6,6 +6,7 @@
 const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 
+const {ManagedLedgerBcoin, LedgerBcoin} = bledger;
 const {Device} = bledger.USB;
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 40000;
 
@@ -27,4 +28,7 @@ describe('USB Device (node)', function () {
   });
 });
 
-require('./general')(Device);
+const tests = require('./general');
+
+tests('USB Device (node) LedgerBcoin', Device, LedgerBcoin);
+tests('USB Device (node) ManagedLedgerBcoin', Device, ManagedLedgerBcoin);
