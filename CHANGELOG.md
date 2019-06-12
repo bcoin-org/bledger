@@ -1,5 +1,28 @@
 # Pre release changelog & notes
 
+## 0.3.0
+
+### Ledger/Bcoin
+  - Move ledger/btc specific code to `ledger/` directory.
+  - Rename `bcoin` to `ledgerbcoin`
+  - Add `managed-ledgerbcoin` that will open/close device for you.
+  - Minor:
+    - Add logger/logs to ledger.
+    - Describe more types.
+    - use bsert for everything.
+
+### Devices
+  - Drop `u2f` support.
+  - Replace `node-hid` with `usb` (`busb`).
+  - Add WebUSB Support (`busb`)
+  - Switch to `busb` that uses: `usb` for node.js and `webusb` for browser.
+  - Add `webauthn` backend.
+  - remove `DeviceInfo` class.
+  - Minor:
+    - Separate error types
+    - `isSupported` and `ensureSupport` are strictly async
+      (both backends webauthn, usb).
+
 ## 0.2.0
 
 ### New features
