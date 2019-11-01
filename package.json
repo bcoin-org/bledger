@@ -37,7 +37,7 @@
     "./lib/bledger": "./lib/bledger-browser.js"
   },
   "dependencies": {
-    "bcrypto": "^3.1.6",
+    "bcrypto": "~3.1.11",
     "blgr": "~0.1.7",
     "bmutex": "~0.1.6",
     "bsert": "~0.0.10",
@@ -51,7 +51,7 @@
     "bcoin": "^1.0.2"
   },
   "devDependencies": {
-    "bcoin": "^1.0.2",
+    "bcoin": "github:bcoin-org/bcoin#75722469",
     "bmocha": "^2.1.1",
     "bpkg": "^0.6.0"
   },
