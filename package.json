@@ -1,6 +1,6 @@
 {
   "name": "bledger",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Communication and management of ledger devices",
   "keywords": [
     "Bitcoin",
@@ -45,7 +45,7 @@
     "bufio": "^1.0.6"
   },
   "optionalDependencies": {
-    "busb": "~0.0.1"
+    "busb": "~0.1.1"
   },
   "peerDependencies": {
     "bcoin": "^1.0.2"
