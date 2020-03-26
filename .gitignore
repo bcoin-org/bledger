@@ -4,6 +4,7 @@ node_modules/
 npm-debug.log
 app.js
 coverage/
+package-lock.json
 
 .certs/*
 !.certs/.keep
