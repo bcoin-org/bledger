@@ -17,7 +17,7 @@ const Logger = require('blgr');
   const device = await Device.requestDevice();
 
   device.set({
-    timeout: 5000,
+    timeout: 10000,
     logger
   });
 
