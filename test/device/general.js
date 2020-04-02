@@ -7,6 +7,7 @@ const assert = require('bsert');
 const bledger = require('../../lib/bledger');
 const fundUtil = require('../util/fund');
 const {hashMessage} = require('../../lib/protocol/common');
+const {BufferSet} = require('buffer-map');
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const MTX = require('bcoin/lib/primitives/mtx');
@@ -209,12 +210,17 @@ module.exports = function (description, Device, LedgerBcoin) {
         [ledgerInput2]
       );
 
+      const sigSet = new BufferSet();
+      sigSet.add(signatures1[0]);
+      sigSet.add(signatures2[0]);
+
       await bcoinApp.signTransaction(tx1, [ledgerInput1]);
       await bcoinApp.signTransaction(tx1, [ledgerInput2]);
 
       const script = tx1.inputs[0].script;
-      assert.bufferEqual(signatures1[0], script.getData(1));
-      assert.bufferEqual(signatures2[0], script.getData(2));
+      assert(sigSet.size, 2);
+      assert(sigSet.has(script.getData(1)));
+      assert(sigSet.has(script.getData(2)));
 
       assert(tx1.verify(), 'Transaction was not signed');
 
