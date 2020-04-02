@@ -11,6 +11,17 @@ You can check [examples/](examples/)
 ### Note
 - `bcoin` is a peer dependency.
 
+## Installation
+
+Bledger depends on [busb][busb] which needs following libraries in order to build.
+
+### Debian/Ubuntu
+
+Add the necessary dependencies:
+```sh
+apt-get install libusb-dev libudev-dev
+```
+
 ## Contribution and License Agreement
 
 If you contribute code to this project, you are implicitly allowing your code
@@ -23,6 +34,7 @@ all code is your original work. `</legalese>`
 
 See LICENSE for more info.
 
+[busb]: https://github.com/nodar-chkuaselidze/busb
 [coverage-status-img]: https://codecov.io/gh/bcoin-org/bledger/badge.svg?branch=master
 [coverage-status-url]: https://codecov.io/gh/bcoin-org/bledger?branch=master
 [circleci-status-img]: https://circleci.com/gh/bcoin-org/bledger/tree/master.svg?style=shield
